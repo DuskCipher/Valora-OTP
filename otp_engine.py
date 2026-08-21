@@ -323,15 +323,18 @@ def otp_planetban(p62):
     headers = {
         "Content-Type": "application/json",
         "Origin": "https://planetban.com",
+        "Referer": "https://planetban.com/register",
         "User-Agent": ua(),
         "Accept": "application/json, text/plain, */*",
     }
     payload = {
-        "name": "Test",
+        "name": rnd_name(),
         "phone": fmt08(p62),
-        "password": "Test123",
+        "email": rnd_email(),
+        "password": "Pass" + ''.join(random.choices(string.digits, k=4)) + "!",
         "purpose": "register",
-        "method": "whatsapp",
+        "channel": "whatsapp",
+        "method": "whatsapp"
     }
     try:
         return requests.post(url, headers=headers, json=payload, timeout=15)
@@ -385,16 +388,17 @@ def otp_hainaya(p62):
         "vertical": "salon",
         "vendor_type": "nail_salon",
         "business_phone": ph,
-        "owner_name": "",
+        "owner_name": rnd_name(),
         "owner_phone": ph,
+        "channel": "whatsapp"
     }
     try:
         r = requests.post(reg_url, headers=headers, json=payload, timeout=15)
-        if r.status_code == 409:
+        if r.status_code in (403, 409):
             h2 = {k: v for k, v in headers.items()}
             h2["Referer"] = "https://app.hainaya.id/login"
             return requests.post("https://app.hainaya.id/api/auth/login", headers=h2,
-                                 json={"phone_number": ph}, timeout=15)
+                                 json={"phone_number": ph, "channel": "whatsapp"}, timeout=15)
         return r
     except Exception:
         return None

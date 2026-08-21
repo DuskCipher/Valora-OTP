@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VALORA OTP — Stress Testing & Security Console</title>
+    <!-- Favicon / Web Icon -->
+    <link rel="icon" type="image/png" href="/static/logo.png">
+    <link rel="shortcut icon" type="image/png" href="/static/logo.png">
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-body: #0b0d12;
+            --bg-card: #131722;
+            --bg-card-hover: #181d2a;
+            --bg-input: #0e111a;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.16);
+            --border-accent: #3b82f6;
+            
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --accent-indigo: #6366f1;
+
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-lg: 14px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scrollbar-width: thin;
+            scrollbar-color: #272d3d var(--bg-body);
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-body);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #272d3d;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b4256;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.04) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.03) 0px, transparent 50%);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            padding: 24px 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Card Container */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 22px 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            transition: border-color 0.2s ease;
+        }
+
+        /* HEADER NAVBAR */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 16px 24px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            height: 48px;
+            width: auto;
+            max-width: 54px;
+            object-fit: contain;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            display: block;
+        }
+
+        .brand-meta h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-meta .version-tag {
+            font-size: 11px;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            background: rgba(59, 130, 246, 0.12);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            padding: 2px 7px;
+            border-radius: 4px;
+        }
+
+        .brand-meta p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        .sys-info-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .info-pill {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 6px 12px;
+            font-size: 12.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+        }
+
+        .info-pill i {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .info-pill .val {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Status Badge */
+        .status-indicator {
+            padding: 6px 14px;
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        .status-idle {
+            background: rgba(100, 116, 139, 0.12);
+            color: var(--text-muted);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+        }
+
+        .status-idle .status-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--text-muted);
+            border-radius: 50%;
+        }
+
+        .status-running {
+            background: rgba(16, 185, 129, 0.12);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-running .status-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--accent-emerald);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent-emerald);
+            animation: pulse-dot 1.4s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        /* GRID LAYOUT */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 480px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* SECTION TITLES */
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        /* FORM CONTROLS */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            color: var(--text-muted);
+            font-size: 14px;
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 12px 14px 12px 42px;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .form-input:focus + .input-icon,
+        .input-wrapper:focus-within .input-icon {
+            color: var(--primary);
+        }
+
+        .norm-preview {
+            font-size: 12px;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+        }
+
+        /* SEGMENTED CONTROL TABS */
+        .segmented-control {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            background: var(--bg-input);
+            padding: 4px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 10px 8px;
+            color: var(--text-muted);
+            font-family: var(--font-sans);
+            font-weight: 600;
+            font-size: 12.5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.15s ease;
+        }
+
+        .tab-btn i {
+            font-size: 13px;
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .tab-btn.active {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* DELAY SLIDER */
+        .delay-box {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 18px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .delay-box.visible {
+            display: flex;
+        }
+
+        .range-slider {
+            width: 100%;
+            accent-color: var(--primary);
+            cursor: pointer;
+            height: 5px;
+            background: var(--bg-input);
+            border-radius: 4px;
+        }
+
+        .delay-val {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 13px;
+        }
+
+        /* PLATFORM TAG GRID */
+        .platform-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .platform-toolbar span {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .btn-text-action {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: background 0.15s;
+        }
+
+        .btn-text-action:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 4px;
+            margin-bottom: 20px;
+        }
+
+        .platform-tag {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s ease;
+        }
+
+        .platform-tag:hover {
+            border-color: var(--border-hover);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .platform-tag.selected {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.35);
+            color: var(--text-primary);
+        }
+
+        .platform-tag.selected .tag-checkbox {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .platform-tag.selected .tag-checkbox::after {
+            display: block;
+        }
+
+        .tag-checkbox {
+            width: 14px;
+            height: 14px;
+            border: 1.5px solid var(--text-muted);
+            border-radius: 3px;
+            position: relative;
+            flex-shrink: 0;
+            transition: all 0.15s;
+        }
+
+        .tag-checkbox::after {
+            content: '';
+            position: absolute;
+            display: none;
+            left: 3.5px;
+            top: 1px;
+            width: 3px;
+            height: 7px;
+            border: solid #fff;
+            border-width: 0 1.5px 1.5px 0;
+            transform: rotate(45deg);
+        }
+
+        .platform-tag input[type="checkbox"] {
+            display: none;
+        }
+
+        .tag-name {
+            font-size: 12.5px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-secondary);
+        }
+
+        .platform-tag.selected .tag-name {
+            color: var(--text-primary);
+        }
+
+        /* ACTIONS */
+        .btn-group {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 13px 20px;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.15s ease;
+            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.25);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-danger {
+            background: rgba(244, 63, 94, 0.1);
+            color: var(--accent-rose);
+            border: 1px solid rgba(244, 63, 94, 0.25);
+            border-radius: var(--radius-md);
+            padding: 13px 16px;
+            font-family: var(--font-sans);
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: var(--accent-rose);
+            color: #fff;
+        }
+
+        .btn-danger:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            border-color: rgba(244, 63, 94, 0.1);
+        }
+
+        /* METRICS & STATS */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 640px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .metric-card {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .metric-label {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .metric-card.success .metric-value { color: var(--accent-emerald); }
+        .metric-card.limit .metric-value { color: var(--accent-amber); }
+        .metric-card.fail .metric-value { color: var(--accent-rose); }
+
+        /* DEVELOPER TERMINAL CONSOLE */
+        .terminal {
+            display: flex;
+            flex-direction: column;
+            height: 460px;
+            background: #08090d;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .terminal-bar {
+            background: #0f121a;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .terminal-path {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-path i {
+            color: var(--text-muted);
+        }
+
+        .terminal-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-term {
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            border-radius: var(--radius-sm);
+            padding: 4px 8px;
+            font-size: 11px;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.15s;
+        }
+
+        .btn-term:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--border-hover);
+        }
+
+        .terminal-output {
+            flex: 1;
+            padding: 14px;
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            line-height: 1.55;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            background: #08090d;
+        }
+
+        .log-row {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            word-break: break-all;
+        }
+
+        .log-row:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .log-ts {
+            color: #475569;
+            font-size: 11.5px;
+            flex-shrink: 0;
+        }
+
+        .log-rd {
+            color: var(--accent-indigo);
+            font-size: 11.5px;
+            flex-shrink: 0;
+            font-weight: 600;
+        }
+
+        .log-target {
+            color: #cbd5e1;
+            min-width: 130px;
+            flex-shrink: 0;
+        }
+
+        .tag-status {
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 10.5px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .tag-SUCCESS { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .tag-LIMIT { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+        .tag-FAIL { background: rgba(244, 63, 94, 0.15); color: #f87171; }
+        .tag-TIMEOUT { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; }
+        .tag-INFO { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+
+        .log-msg {
+            color: #94a3b8;
+            flex: 1;
+        }
+
+        .log-sys-entry {
+            color: #60a5fa;
+            font-size: 12px;
+            padding: 6px 10px;
+            background: rgba(59, 130, 246, 0.06);
+            border-left: 2px solid var(--primary);
+            border-radius: 0 4px 4px 0;
+            margin: 2px 0;
+        }
+
+        /* TOAST NOTIFICATIONS */
+        .toast-box {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .toast-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-hover);
+            border-left: 3px solid var(--primary);
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: 13px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: toast-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .toast-item.error { border-left-color: var(--accent-rose); }
+        .toast-item.success { border-left-color: var(--accent-emerald); }
+
+        @keyframes toast-in {
+            from { transform: translateY(12px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        /* USER NOTICE BANNER */
+        .user-notice-banner {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.22);
+            border-radius: var(--radius-md);
+            padding: 10px 14px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 12px;
+            color: #93c5fd;
+            line-height: 1.45;
+        }
+
+        .user-notice-banner i {
+            color: #60a5fa;
+            font-size: 14px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .user-notice-banner strong {
+            color: #f8fafc;
+        }
+
+        /* WELCOME HERO BANNER */
+        .welcome-hero {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.75) 100%);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .welcome-hero::after {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -5%;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .welcome-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            color: #60a5fa;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .welcome-content h2 {
+            font-size: 19px;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+            margin-bottom: 3px;
+        }
+
+        .welcome-content p {
+            font-size: 12.5px;
+            color: var(--text-secondary);
+            max-width: 680px;
+            line-height: 1.45;
+        }
+
+        .live-clock-pill {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 8px 14px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .live-clock-pill i {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- TOP NAVIGATION & STATUS BAR -->
+        <header class="card navbar">
+            <div class="brand">
+                <img src="/static/logo.png" alt="VALORA-OTP" class="brand-logo">
+                <div class="brand-meta">
+                    <h1>VALORA OTP <span class="version-tag">v2.4</span></h1>
+                    <p>OTP Engine Stress Testing & Security Console</p>
+                </div>
+            </div>
+
+            <div class="sys-info-bar">
+                <div class="info-pill">
+                    <i class="fa-solid fa-network-wired"></i>
+                    <span>IP:</span>
+                    <span class="val" id="sys-ip">Loading...</span>
+                </div>
+                <div class="info-pill">
+                    <i class="fa-solid fa-server"></i>
+                    <span>OS:</span>
+                    <span class="val" id="sys-os">-</span>
+                </div>
+                <div class="info-pill">
+                    <i class="fa-brands fa-python"></i>
+                    <span>Py:</span>
+                    <span class="val" id="sys-py">-</span>
+                </div>
+                <div id="status-pill" class="status-indicator status-idle">
+                    <div class="status-dot"></div>
+                    <span id="status-text">IDLE</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- WELCOME HERO BANNER -->
+        <div class="welcome-hero">
+            <div class="welcome-content">
+                <div class="welcome-badge">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>VALORA OTP CONTROL CENTER</span>
+                </div>
+                <h2>🔥 Selamat Datang di Valora OTP Console!</h2>
+                <p>Tools Spam OTP gunakan dengan bijak<br><span style="color: var(--accent-rose); font-weight: 700; display: inline-block; margin-top: 4px;">⚠️ SPAM OTP kami tidak bertanggung jawab</span></p>
+            </div>
+            <div class="welcome-actions">
+                <div class="live-clock-pill">
+                    <i class="fa-regular fa-clock"></i>
+                    <span id="live-time">--:--:--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN DASHBOARD CONTENT -->
+        <div class="main-grid">
+            <!-- LEFT PANEL: CONFIGURATION -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fa-solid fa-sliders"></i> Parameter Konfigurasi</h2>
+                </div>
+
+                <!-- USER LIMIT NOTICE & TELEGRAM PROMO -->
+                <div class="user-notice-banner">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <div>
+                        <strong>Ketentuan Kuota Pengguna:</strong>
+                        <span>Untuk pengguna biasa & perangkat mobile/Android, terdapat batasan pengiriman OTP yaitu <strong>maksimal 1x setiap platform per hari</strong> demi menjaga keandalan sistem.</span>
+                    </div>
+                </div>
+
+                <div class="user-notice-banner" style="background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.25); color: #fde68a;">
+                    <i class="fa-solid fa-crown" style="color: #fbbf24;"></i>
+                    <div>
+                        <strong style="color: #fbbf24;">Ingin Full Version Tanpa Limit?</strong>
+                        <span>Untuk OTP tanpa limit dan jumlah platform lebih banyak, Anda bisa beli source code resminya di Telegram: <a href="https://t.me/Riz_BuyX" target="_blank" style="color: #60a5fa; font-weight: 700; text-decoration: underline;">@Riz_BuyX</a></span>
+                    </div>
+                </div>
+
+                <!-- PHONE NUMBER INPUT -->
+                <div class="form-group">
+                    <div class="form-label">
+                        <span>Nomor Target (WhatsApp)</span>
+                        <span class="norm-preview" id="norm-preview">Target: -</span>
+                    </div>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-mobile-screen input-icon"></i>
+                        <input type="text" id="phone-input" class="form-input" placeholder="081234567890 / 62812..." autocomplete="off">
+                    </div>
+                </div>
+
+                <!-- MODE SELECTOR TABS -->
+                <div class="form-group">
+                    <div class="form-label">Mode Pengiriman</div>
+                    <div class="segmented-control">
+                        <button type="button" class="tab-btn active" data-mode="single" onclick="setMode('single')">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Single</span>
+                        </button>
+                        <button type="button" class="tab-btn" data-mode="loop" onclick="setMode('loop')">
+                            <i class="fa-solid fa-rotate"></i>
+                            <span>Loop</span>
+                        </button>
+                        <button type="button" class="tab-btn" data-mode="pick" onclick="setMode('pick')">
+                            <i class="fa-solid fa-filter"></i>
+                            <span>Custom</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- DELAY SLIDER FOR LOOP MODE -->
+                <div class="delay-box" id="delay-container">
+                    <div class="form-label">
+                        <span>Interval Per Round</span>
+                        <span class="delay-val" id="delay-val-text">60 detik</span>
+                    </div>
+                    <input type="range" id="delay-slider" class="range-slider" min="5" max="300" value="60" oninput="updateDelayText(this.value)">
+                </div>
+
+                <!-- PLATFORM SELECTION -->
+                <div class="form-group">
+                    <div class="platform-toolbar">
+                        <span id="platform-count-label">Pilih Platform OTP</span>
+                        <div>
+                            <button type="button" class="btn-text-action" onclick="toggleSelectAllPlatforms(true)">Pilih Semua</button>
+                            <span style="color: var(--text-muted); font-size: 11px;">|</span>
+                            <button type="button" class="btn-text-action" onclick="toggleSelectAllPlatforms(false)">Reset</button>
+                        </div>
+                    </div>
+                    <div class="platform-grid" id="platform-grid">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="btn-group">
+                    <button type="button" id="btn-launch" class="btn-primary" onclick="startSpam()">
+                        <i class="fa-solid fa-play"></i> JALANKAN PROSES
+                    </button>
+                    <button type="button" id="btn-stop" class="btn-danger" onclick="stopSpam()" disabled>
+                        <i class="fa-solid fa-stop"></i> HENTIKAN
+                    </button>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: MONITORING & TERMINAL -->
+            <div class="card" style="display: flex; flex-direction: column;">
+                <div class="card-header">
+                    <h2 class="card-title"><i class="fa-solid fa-chart-simple"></i> Live Monitor & Activity</h2>
+                </div>
+
+                <!-- STATS COUNTERS -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span class="metric-label">Total Req</span>
+                        <span class="metric-value" id="stat-total">0</span>
+                    </div>
+                    <div class="metric-card success">
+                        <span class="metric-label">Sukses</span>
+                        <span class="metric-value" id="stat-success">0</span>
+                    </div>
+                    <div class="metric-card limit">
+                        <span class="metric-label">Rate Limit</span>
+                        <span class="metric-value" id="stat-limit">0</span>
+                    </div>
+                    <div class="metric-card fail">
+                        <span class="metric-label">Gagal</span>
+                        <span class="metric-value" id="stat-fail">0</span>
+                    </div>
+                </div>
+
+                <!-- DEVELOPER TERMINAL CONSOLE -->
+                <div class="terminal">
+                    <div class="terminal-bar">
+                        <div class="terminal-path">
+                            <i class="fa-solid fa-terminal"></i>
+                            <span>~/valora-otp/live-stream</span>
+                        </div>
+                        <div class="terminal-actions">
+                            <button class="btn-term" onclick="clearLogs()"><i class="fa-solid fa-eraser"></i> Clear</button>
+                        </div>
+                    </div>
+                    <div class="terminal-output" id="terminal-body">
+                        <div class="log-sys-entry">
+                            [SYSTEM] Console siap. Silakan konfigurasi target dan tekan "Jalankan Proses".
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-box" id="toast-container"></div>
+
+    <script>
+        let currentMode = 'single';
+        let platformsData = [];
+        let isRunning = false;
+        let eventSource = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchSystemInfo();
+            setupPhoneInputListener();
+            connectSSE();
+            updateLiveClock();
+            setInterval(updateLiveClock, 1000);
+        });
+
+        function updateLiveClock() {
+            const timeEl = document.getElementById('live-time');
+            if (timeEl) {
+                const now = new Date();
+                timeEl.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+            }
+        }
+
+        async function fetchSystemInfo() {
+            try {
+                const res = await fetch('/api/info');
+                const data = await res.json();
+                
+                document.getElementById('sys-ip').textContent = data.system.public_ip || '127.0.0.1';
+                document.getElementById('sys-os').textContent = data.system.os || 'Linux/Win';
+                document.getElementById('sys-py').textContent = data.system.python || '3.x';
+
+                platformsData = data.platforms || [];
+                renderPlatformGrid();
+
+                if (data.active) {
+                    updateStatusUI(true, data.job.current_round);
+                    updateStatsUI(data.job.stats);
+                }
+            } catch (err) {
+                console.error('Failed to fetch system info:', err);
+            }
+        }
+
+        function setupPhoneInputListener() {
+            const phoneInput = document.getElementById('phone-input');
+            const normPreview = document.getElementById('norm-preview');
+
+            phoneInput.addEventListener('input', () => {
+                const val = phoneInput.value.trim().replace(/[^\d+]/g, '');
+                if (!val) {
+                    normPreview.textContent = 'Target: -';
+                    normPreview.style.color = 'var(--text-muted)';
+                    return;
+                }
+                
+                let norm = val.replace(/\s+|-/g, '').replace(/^\+/, '');
+                if (norm.startsWith('08')) norm = '62' + norm.substring(1);
+                else if (norm.startsWith('8')) norm = '62' + norm;
+
+                if (norm.startsWith('62') && norm.length >= 10) {
+                    normPreview.textContent = `Target: +${norm}`;
+                    normPreview.style.color = 'var(--accent-emerald)';
+                } else {
+                    normPreview.textContent = 'Format nomor belum sesuai';
+                    normPreview.style.color = 'var(--accent-rose)';
+                }
+            });
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === mode);
+            });
+
+            const delayContainer = document.getElementById('delay-container');
+            if (mode === 'loop') {
+                delayContainer.classList.add('visible');
+            } else {
+                delayContainer.classList.remove('visible');
+            }
+        }
+
+        function updateDelayText(val) {
+            document.getElementById('delay-val-text').textContent = `${val} detik`;
+        }
+
+        function renderPlatformGrid() {
+            const grid = document.getElementById('platform-grid');
+            grid.innerHTML = '';
+
+            document.getElementById('platform-count-label').textContent = `Pilih Platform OTP (${platformsData.length} Platform)`;
+
+            platformsData.forEach(p => {
+                const tag = document.createElement('label');
+                tag.className = 'platform-tag selected';
+                tag.dataset.id = p.id;
+                tag.innerHTML = `
+                    <input type="checkbox" value="${p.id}" checked onchange="onPlatformCheckChange(this)">
+                    <div class="tag-checkbox"></div>
+                    <span class="tag-name">${p.id}. ${p.name}</span>
+                `;
+                grid.appendChild(tag);
+            });
+        }
+
+        function onPlatformCheckChange(input) {
+            const tag = input.closest('.platform-tag');
+            tag.classList.toggle('selected', input.checked);
+        }
+
+        function toggleSelectAllPlatforms(select) {
+            document.querySelectorAll('#platform-grid input[type="checkbox"]').forEach(cb => {
+                cb.checked = select;
+                const tag = cb.closest('.platform-tag');
+                tag.classList.toggle('selected', select);
+            });
+        }
+
+        function getSelectedPlatformIds() {
+            const selected = [];
+            document.querySelectorAll('#platform-grid input[type="checkbox"]:checked').forEach(cb => {
+                selected.push(parseInt(cb.value));
+            });
+            return selected;
+        }
+
+        async function startSpam() {
+            const phoneInput = document.getElementById('phone-input').value.trim();
+            const delay = parseInt(document.getElementById('delay-slider').value) || 60;
+            const chosenPlatforms = getSelectedPlatformIds();
+
+            if (!phoneInput) {
+                showToast('Masukkan nomor target!', 'error');
+                return;
+            }
+
+            if (chosenPlatforms.length === 0) {
+                showToast('Pilih minimal 1 platform!', 'error');
+                return;
+            }
+
+            const btnLaunch = document.getElementById('btn-launch');
+            btnLaunch.disabled = true;
+
+            try {
+                const res = await fetch('/api/spam/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phone: phoneInput,
+                        mode: currentMode,
+                        delay: delay,
+                        platforms: chosenPlatforms
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    updateStatusUI(true, 1);
+                } else {
+                    showToast(data.message, 'error');
+                    btnLaunch.disabled = false;
+                }
+            } catch (err) {
+                showToast('Gagal terhubung ke server!', 'error');
+                btnLaunch.disabled = false;
+            }
+        }
+
+        async function stopSpam() {
+            try {
+                const res = await fetch('/api/spam/stop', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (err) {
+                showToast('Gagal mengirim sinyal hentikan!', 'error');
+            }
+        }
+
+        function connectSSE() {
+            if (eventSource) eventSource.close();
+            eventSource = new EventSource('/api/spam/stream');
+
+            eventSource.onmessage = (e) => {
+                try {
+                    const data = JSON.parse(e.data);
+                    handleSSEEvent(data);
+                } catch (err) {
+                    console.error('SSE Error parsing JSON:', err);
+                }
+            };
+
+            eventSource.onerror = () => {
+                console.warn('SSE connection error. Retrying...');
+            };
+        }
+
+        function handleSSEEvent(data) {
+            if (data.type === 'init') {
+                if (data.active) {
+                    updateStatusUI(true, data.job.current_round);
+                    updateStatsUI(data.job.stats);
+                }
+            } else if (data.type === 'job_start') {
+                updateStatusUI(true, 1);
+                appendSysLog(`Memulai proses ke ${data.job.phone_fmt} | Mode: ${data.job.mode.toUpperCase()} | ${data.job.total_platforms} Platform`);
+            } else if (data.type === 'round_start') {
+                appendSysLog(`--- ROUND ${data.round} [${data.timestamp}] ---`);
+                updateStatusUI(true, data.round);
+            } else if (data.type === 'log') {
+                appendLogLine(data.entry);
+                updateStatsUI(data.stats);
+            } else if (data.type === 'round_complete') {
+                appendSysLog(`✔ Round ${data.round} selesai (${data.round_success} sukses)`);
+                updateStatsUI(data.stats);
+            } else if (data.type === 'job_complete') {
+                updateStatusUI(false);
+                appendSysLog(`Proses selesai / dihentikan. Status: ${data.status.toUpperCase()}`);
+                showToast('Proses telah selesai', 'success');
+            }
+        }
+
+        function updateStatusUI(running, roundNum = 0) {
+            isRunning = running;
+            const pill = document.getElementById('status-pill');
+            const text = document.getElementById('status-text');
+            const btnLaunch = document.getElementById('btn-launch');
+            const btnStop = document.getElementById('btn-stop');
+
+            if (running) {
+                pill.className = 'status-indicator status-running';
+                text.textContent = roundNum > 0 ? `RUNNING (RD ${roundNum})` : 'RUNNING';
+                btnLaunch.disabled = true;
+                btnStop.disabled = false;
+            } else {
+                pill.className = 'status-indicator status-idle';
+                text.textContent = 'IDLE';
+                btnLaunch.disabled = false;
+                btnStop.disabled = true;
+            }
+        }
+
+        function updateStatsUI(stats) {
+            if (!stats) return;
+            document.getElementById('stat-total').textContent = stats.total || 0;
+            document.getElementById('stat-success').textContent = stats.success || 0;
+            document.getElementById('stat-limit').textContent = stats.limit || 0;
+            document.getElementById('stat-fail').textContent = stats.fail || 0;
+        }
+
+        function appendLogLine(entry) {
+            const body = document.getElementById('terminal-body');
+            const line = document.createElement('div');
+            line.className = 'log-row';
+
+            let badgeClass = 'tag-INFO';
+            if (entry.status === 'SUCCESS') badgeClass = 'tag-SUCCESS';
+            else if (entry.status === 'LIMIT') badgeClass = 'tag-LIMIT';
+            else if (entry.status === 'FAIL') badgeClass = 'tag-FAIL';
+            else if (entry.status === 'TIMEOUT') badgeClass = 'tag-TIMEOUT';
+
+            line.innerHTML = `
+                <span class="log-ts">[${entry.timestamp}]</span>
+                <span class="log-rd">R#${entry.round}</span>
+                <span class="log-target">${entry.platform_name}</span>
+                <span class="tag-status ${badgeClass}">${entry.status}</span>
+                <span class="log-msg">${escapeHtml(entry.detail)}</span>
+            `;
+
+            body.appendChild(line);
+            body.scrollTop = body.scrollHeight;
+        }
+
+        function appendSysLog(msg) {
+            const body = document.getElementById('terminal-body');
+            const line = document.createElement('div');
+            line.className = 'log-sys-entry';
+            line.textContent = `[SYSTEM] ${msg}`;
+            body.appendChild(line);
+            body.scrollTop = body.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('terminal-body').innerHTML = `
+                <div class="log-sys-entry">[SYSTEM] Console dibersihkan.</div>
+            `;
+        }
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast-item ${type}`;
+            toast.innerHTML = `<i class="fa-solid fa-circle-info"></i> <span>${msg}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3500);
+        }
+
+        function escapeHtml(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>

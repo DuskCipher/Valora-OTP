@@ -379,7 +379,7 @@ def otp_hainaya(p62):
     prefix = random.choice(['Tst', 'Coba', 'Uji', 'Test', 'Demo', 'Sample', 'Bisnis'])
     mid = ''.join(random.choices(string.ascii_lowercase, k=random.randint(3, 6)))
     bname = prefix + mid.capitalize() + str(random.randint(10, 999))
-    ph = fmtphone(p62)
+    ph = fmt08(p62)
     payload = {
         "business_name": bname,
         "vertical": "salon",

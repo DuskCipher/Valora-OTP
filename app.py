@@ -273,7 +273,7 @@ def api_start_spam():
     if not chosen_indices:
         chosen_indices = list(range(1, len(PLATFORMS) + 1))
 
-    # Proteksi / Limit Perangkat Android & User Eksternal
+    # Proteksi / Limit Perangkat Android & User Eksternal (Maksimal 1x per platform)
     user_agent = request.headers.get('User-Agent', '')
     forwarded = request.headers.get('X-Forwarded-For', '')
     client_ip = forwarded.split(',')[0].strip() if forwarded else request.remote_addr
@@ -282,9 +282,8 @@ def api_start_spam():
 
     limited_msg = ""
     if is_android or is_external:
-        mode = "single"
-        chosen_indices = chosen_indices[:1]  # Batasi HANYA 1 OTP per platform per hari
-        limited_msg = " (Batas Pengguna Biasa: Maksimal 1x OTP per platform / hari)"
+        mode = "single"  # Paksa mode Single (1x pengiriman per platform)
+        limited_msg = " (Batas Pengguna Biasa: 1x OTP per platform)"
 
     # Start background worker thread
     t = threading.Thread(

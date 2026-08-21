@@ -202,7 +202,8 @@ def favicon():
 def api_info():
     ip = get_ip()
     user_agent = request.headers.get('User-Agent', '')
-    client_ip = request.remote_addr
+    forwarded = request.headers.get('X-Forwarded-For', '')
+    client_ip = forwarded.split(',')[0].strip() if forwarded else request.remote_addr
     is_android = 'android' in user_agent.lower()
     is_external = client_ip not in ('127.0.0.1', 'localhost', '::1')
     is_limited = is_android or is_external
@@ -274,7 +275,8 @@ def api_start_spam():
 
     # Proteksi / Limit Perangkat Android & User Eksternal
     user_agent = request.headers.get('User-Agent', '')
-    client_ip = request.remote_addr
+    forwarded = request.headers.get('X-Forwarded-For', '')
+    client_ip = forwarded.split(',')[0].strip() if forwarded else request.remote_addr
     is_android = 'android' in user_agent.lower()
     is_external = client_ip not in ('127.0.0.1', 'localhost', '::1')
 

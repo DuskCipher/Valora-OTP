@@ -355,7 +355,7 @@ def otp_tuneup(p62):
         "company_name": "PT " + name.capitalize(),
         "owner_name": name.capitalize(),
         "address": ''.join(random.choices(string.ascii_letters + string.digits, k=10)),
-        "email": name + "@mailnesia.com",
+        "email": rnd_email(),
         "phone_number": fmt08(p62),
         "province_code": "32",
         "city_code": "32.04",
@@ -408,20 +408,20 @@ def otp_hainaya(p62):
 # ============================================================
 
 PLATFORMS = [
-    ("Internet Rakyat", otp_internetrakyat),
-    ("PTSP Kemenag",    otp_ptsp_kemenag),
+    ("Internet Rakyat", otp_internetrakyat), # Sering rate-limit
+    # ("PTSP Kemenag",    otp_ptsp_kemenag), # 400 Bad Request (API changed)
     ("HRS-BRE",         otp_hrsbre),
-    ("Rumah123",        otp_rumah123),
-    ("Paper",           otp_paper),
-    ("DuniaGames",      otp_duniagames),
+    # ("Rumah123",        otp_rumah123), # 403 Cloudflare/WAF block
+    # ("Paper",           otp_paper), # 403 Cloudflare/WAF block
+    # ("DuniaGames",      otp_duniagames), # 403 WAF block
     ("BonusBelanja",    otp_bonusbelanja),
     ("Matahari",        otp_matahari),
-    ("Auto2000",        otp_auto2000),
-    ("SIDEMANG",        otp_sidemang),
-    ("Klook",           otp_klook),
-    ("PlanetBan",       otp_planetban),
+    # ("Auto2000",        otp_auto2000), # 401 Unauthorized (Hardcoded tokens expired)
+    # ("SIDEMANG",        otp_sidemang), # 400 Captcha required
+    # ("Klook",           otp_klook), # 403 Captcha delivery block
+    # ("PlanetBan",       otp_planetban), # 400 Bad Request
     ("TuneUp",          otp_tuneup),
-    ("Hainaya",         otp_hainaya),
+    # ("Hainaya",         otp_hainaya), # 403 Security verification failed
 ]
 
 def verdict(resp):
